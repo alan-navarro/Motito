@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi Caja</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#004D4A"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Mi Caja"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png">
+<style>
+:root{--bg:#FBFAF6;--card:#fff;--ink:#1F2A7A;--text:#1d1d24;--mut:#6b6b78;--red:#C8281E;--redt:#fff;--line:#d9d9e6;--ok:#1f7a45;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161d;--card:#1f2029;--ink:#9fb0ff;--text:#f0f0f5;--mut:#9a9aab;--red:#e5483c;--line:#34364a;--ok:#4cc380;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15161d;--card:#1f2029;--ink:#9fb0ff;--text:#f0f0f5;--mut:#9a9aab;--red:#e5483c;--line:#34364a;--ok:#4cc380;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif;max-width:720px;margin-inline:auto;padding-bottom:40px}
+h1,.hand{font-family:"Caveat","Segoe Print","Bradley Hand",cursive;color:var(--ink)}
+h1{font-size:34px;margin:14px 16px 4px;font-weight:700}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:8px 16px}
+.tab{flex:none;border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:8px 14px;font:600 15px inherit;font-family:inherit;cursor:pointer}
+.tab.on{background:var(--ink);color:var(--bg)}
+.tab small{opacity:.8;margin-left:6px}
+.tab.new{border-style:dashed}
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:8px 16px}
+.item{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:14px 12px;text-align:left;cursor:pointer;color:var(--text);font-family:inherit;position:relative;min-height:74px}
+.item:active{transform:scale(.97);border-color:var(--red)}
+.item b{display:block;font-size:17px}
+.item span{color:var(--red);font-weight:700;font-size:19px}
+.item i{position:absolute;top:8px;right:10px;background:var(--red);color:var(--redt);border-radius:999px;min-width:24px;height:24px;font:700 13px/24px system-ui;text-align:center;font-style:normal}
+.ticket{margin:14px 16px;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:14px}
+.ticket header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ticket h2{margin:0;font-size:28px}
+.link{background:none;border:0;color:var(--mut);text-decoration:underline;cursor:pointer;font:inherit;font-size:14px}
+.row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.row .n{flex:1}
+.row .q{display:flex;align-items:center;gap:6px}
+.q button{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--ink);background:none;color:var(--ink);font-size:18px;cursor:pointer}
+.row .p{width:64px;text-align:right;font-variant-numeric:tabular-nums}
+.empty{color:var(--mut);padding:14px 0}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;font-size:20px}
+.total strong{font-size:32px;color:var(--red);font-variant-numeric:tabular-nums}
+.btn{width:100%;margin-top:12px;padding:15px;border:0;border-radius:12px;background:var(--red);color:var(--redt);font:700 18px inherit;font-family:inherit;cursor:pointer}
+.btn:disabled{opacity:.4}
+.btn.alt{background:transparent;color:var(--text);border:1.5px solid var(--line)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.sheet{background:var(--bg);width:100%;max-width:720px;border-radius:18px 18px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));max-height:90%;overflow:auto}
+.sheet .big{font-size:48px;font-weight:800;color:var(--red);margin:4px 0 12px}
+.sheet input{width:100%;font-size:22px;padding:12px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--text)}
+.chg{margin-top:10px;font-size:20px}.chg b{color:var(--ok)}
+.hist{margin:0 16px}
+.hist summary{cursor:pointer;color:var(--red);font-weight:800;font-size:20px;padding:12px 0}
+.split{display:flex;gap:16px;flex-wrap:wrap;padding:0 0 8px;color:var(--mut)}.split b{color:var(--text)}
+.pay{display:flex;gap:10px;margin:8px 0 14px}.pay button{flex:1;padding:14px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);font:600 17px inherit;font-family:inherit;cursor:pointer}.pay button.on{border-color:var(--ok);background:var(--ok);color:#fff}
+.hist .row{font-size:15px}
+.srow{display:flex;justify-content:space-between;padding:6px 0;font-size:18px}.big2{border-top:2px solid var(--line);margin-top:6px;padding-top:10px;font-size:22px}.big2 b{font-size:30px}
+.item.dash{border-style:dashed}.item.sel{border-color:var(--teal);box-shadow:0 0 0 2px var(--teal)}.item.meat{background:rgba(128,128,140,.22)}.sheet label{display:block;margin:10px 0 4px}
+.dbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 4px}.dbar .dl{font-size:13px;color:var(--mut)}
+.dch{width:38px;height:38px;border-radius:50%;border:3px solid var(--c);background:transparent;color:var(--text);font:800 16px system-ui;cursor:pointer}.dch.on{background:var(--c);color:#fff}
+.dadd{width:38px;height:38px;border-radius:50%;border:2px dashed var(--mut);background:none;color:var(--mut);font-size:20px;cursor:pointer}
+.dh{display:flex;align-items:center;gap:8px;font-weight:700;margin-top:10px;padding:6px 8px;border-radius:8px;border-left:5px solid var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+.dh .dot{width:24px;height:24px;border-radius:50%;background:var(--c);color:#fff;font:800 13px/24px system-ui;text-align:center}.dh .ds{margin-left:auto;font-variant-numeric:tabular-nums}
+.row.sm{font-size:14px;padding:6px 0}.nt{color:var(--text);font-style:italic;font-size:13px}.addn{color:var(--teal);font-size:12px}
+.hist .sale>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 0;font-size:15px;font-weight:400;color:var(--text);cursor:pointer;border-bottom:1px dashed var(--line)}
+.hist .sale>summary::-webkit-details-marker{display:none}.hist .sale>summary .n{flex:1}.hist .sale>summary .p{font-weight:700;font-variant-numeric:tabular-nums}.hist .sale[open]{padding-bottom:6px}
+</style>
+</head>
+<body>
+<h1>Tortas ahogadas</h1>
+<div style="display:flex;justify-content:space-between;align-items:center;margin:0 16px"><div id="sync" style="font-size:13px;color:var(--mut)"></div></div>
+<div class="tabs" id="tabs"></div>
+<div class="menu" id="menu"></div>
+<div class="ticket" id="ticket"></div>
+<details class="hist" id="hist"></details>
+<details class="hist" id="prov"></details>
+<div class="ticket" id="sum"></div>
+<div id="modal"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+window.addEventListener('error',e=>{const s=document.getElementById('sync');if(s){s.style.color='var(--red)';s.textContent='Error: '+e.message}});
+const MENU=[
+{id:'torta',n:'Torta',p:65},{id:'media',n:'½ torta',p:35},
+{id:'lengua',n:'Lengua',p:75},{id:'buche',n:'Buche',p:75},
+{id:'mix',n:'Mix',p:70},{id:'taco',n:'Taco',p:16},
+{id:'tacocarne',n:'Taco / carne',p:30},{id:'blandito',n:'Taco blandito',p:30},{id:'mochi',n:'Mochi',p:30},
+{id:'refresco',n:'Refresco',p:27}];
+const P=Object.fromEntries(MENU.map(m=>[m.id,m]));
+const KEY='tortas-pos-v2';
+let S={orders:[],active:null,seq:1,sold:[]};
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+migrate();
+function status(t){const e=$('sync');if(e)e.textContent=t}
+const FB={apiKey:"AIzaSyAXnKsDMUgAdNVCXwQVQUrPVID4Gwnv_lo",authDomain:"cuentasmart-d1c7f.firebaseapp.com",projectId:"cuentasmart-d1c7f",storageBucket:"cuentasmart-d1c7f.firebasestorage.app",messagingSenderId:"1066968485319",appId:"1:1066968485319:web:0dbfb4f45ceda3e9a29de2"};
+let FS=null;
+try{firebase.initializeApp(FB);FS=firebase.firestore();FS.enablePersistence({synchronizeTabs:true}).catch(()=>{});firebase.auth().signInAnonymously().then(()=>{flush();pushOrders()}).catch(()=>status('⚠ Sin sesión de Firebase'))}catch(e){FS=null}
+const outbox=()=>(S.out=S.out||[]);
+const dayOf=ts=>new Date(ts).toLocaleDateString('sv-SE');
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let PT=null;
+const save=()=>{S.upd=Date.now();persist();clearTimeout(PT);PT=setTimeout(()=>{pushOrders();flush()},300)};
+function docFor(it){const d=it.data;
+if(it.type==='sale')return['ventas',it.id,{ordenId:String(d.ordenId||''),nombre:d.name,total:d.total,pago:d.pay||'',comensales:d.nd||1,cobradaEn:new Date(d.ts),dia:dayOf(d.ts)}];
+return['pagosProveedores',it.id,{proveedor:d.name,monto:d.amt,creadoEn:new Date(d.ts),dia:dayOf(d.ts)}]}
+function flush(){if(!FS)return syncStatus();
+outbox().forEach(it=>{if(it.sending)return;it.sending=1;const[c,id,data]=docFor(it);
+FS.collection(c).doc(id).set(data).then(()=>{S.out=outbox().filter(x=>x.id!==it.id);persist();syncStatus()}).catch(()=>{it.sending=0})});
+syncStatus()}
+function syncStatus(){const n=outbox().length;status(!FS?'Sin conexión con Firebase':n?'⏳ '+n+' por enviar (se envían al reconectar)':'☁ Sincronizado con cocina')}
+const LAST={};
+function pushOrders(){if(!FS||!S.orders)return;const b=FS.batch(),now=new Date(),cur=new Set();
+S.orders.forEach(o=>{const oid=String(o.id);cur.add(oid);const ref=FS.collection('ordenes').doc(oid);
+b.set(ref,{id:oid,nombre:o.name,estado:'abierta',nd:o.nd||1,dispositivo:'mesero',actualizadaEn:now},{merge:true});
+const ids=new Set();(o.lines||[]).forEach(l=>{const lid=String(l.id);ids.add(lid);
+b.set(ref.collection('lineas').doc(lid),{producto:L(l.k).n,clave:l.k,precio:L(l.k).p,cantidad:l.q,comensal:l.d,nota:l.n||'',ordenNombre:o.name,ordenId:oid,abierta:true},{merge:true})});
+(LAST[oid]||new Set()).forEach(lid=>{if(!ids.has(lid))b.delete(ref.collection('lineas').doc(lid))});
+LAST[oid]=ids});
+Object.keys(LAST).forEach(oid=>{if(!cur.has(oid)){const ref=FS.collection('ordenes').doc(oid);b.set(ref,{estado:'cerrada',actualizadaEn:now},{merge:true});
+LAST[oid].forEach(lid=>b.set(ref.collection('lineas').doc(lid),{abierta:false},{merge:true}));delete LAST[oid]}});
+b.commit().catch(()=>{})}
+window.addEventListener('online',()=>{flush();pushOrders()});
+setInterval(()=>{flush()},30000);
+const $=id=>document.getElementById(id);
+const money=n=>(n<0?'-':'')+'$'+Math.abs(n).toLocaleString('es-MX');
+const clean=s=>s.replace(/[|'"<>\\`$]/g,'').trim();
+function L(k){if(k.startsWith('x|')){const a=k.split('|');return{n:a[1],p:+a[2]}}const[b,v]=k.split(':'),m=P[b];return{n:v?(b==='mix'?'Mix de ':b==='blandito'?'Taco blandito de ':'Taco de ')+v.replace('+',' y '):m.n,p:m.p}}
+const DC=['#149C98','#C2447F','#E39A2D','#7A5CC9','#2B7FD8','#D9543A','#6B8E23','#6B7F86'];
+const dcol=d=>DC[(d-1)%DC.length];
+function migrate(){S.lid=S.lid||1000;S.orders=Array.isArray(S.orders)?S.orders:Object.values(S.orders||{});S.sold=Array.isArray(S.sold)?S.sold:Object.values(S.sold||{});S.orders.forEach(o=>{if(!Array.isArray(o.lines)){o.lines=o.lines&&typeof o.lines==='object'?Object.values(o.lines):Object.entries(o.items||{}).map(([k,q])=>({id:++S.lid,k,q,d:1,n:''}));delete o.items}o.nd=o.nd||1;o.dc=o.dc||1})}
+const total=o=>o.lines.reduce((s,l)=>s+L(l.k).p*l.q,0);
+const qk=(o,k)=>o.lines.filter(l=>l.k===k).reduce((a,l)=>a+l.q,0);
+const snap=l=>({n:L(l.k).n,p:L(l.k).p,q:l.q,d:l.d,t:l.n});
+const count=o=>o.lines.reduce((s,l)=>s+l.q,0);
+const cur=()=>{let o=S.orders.find(x=>x.id===S.active);if(!o&&S.orders.length){o=S.orders[0];S.active=o.id}if(o&&!Array.isArray(o.lines)){migrate();o=S.orders.find(x=>x.id===S.active)}return o};
+function newOrder(){const o={id:Date.now(),name:'Orden '+S.seq++,lines:[],nd:1,dc:1};S.orders.push(o);S.active=o.id;save();render()}
+function add(k,d){const o=cur();if(!o)return;const l=o.lines.find(x=>x.k===k&&x.d===o.dc&&!x.n);
+if(l){l.q+=d;if(l.q<=0)o.lines=o.lines.filter(x=>x!==l)}else if(d>0)o.lines.push({id:++S.lid,k,q:d,d:o.dc,n:''});save();render()}
+function lineQ(id,d){const o=cur();if(!o)return;const l=o.lines.find(x=>x.id===id);if(!l)return;l.q+=d;if(l.q<=0)o.lines=o.lines.filter(x=>x!==l);save();render()}
+function setDiner(d){const o=cur();if(!o)return;o.dc=d;save();render()}
+function addDiner(){const o=cur();if(!o)return;o.nd++;o.dc=o.nd;save();render()}
+function delDiner(){const o=cur();if(o&&o.nd>1&&!o.lines.some(l=>l.d===o.nd)){o.nd--;if(o.dc>o.nd)o.dc=o.nd;save();render()}}
+function merge(o,x){const y=o.lines.find(z=>z!==x&&z.k===x.k&&z.d===x.d&&z.n===x.n);if(y){y.q+=x.q;o.lines=o.lines.filter(z=>z!==x)}}
+let lsid=null,lsc='all',lsd=1;
+function lineSheet(id){const o=cur();if(!o)return;const l=o.lines.find(x=>x.id===id);if(!l)return;lsid=id;lsc='all';lsd=l.d;
+$('modal').innerHTML=shell(`<h2 class="hand" style="margin:0;font-size:30px">${L(l.k).n}</h2><p style="margin:2px 0 4px;color:var(--mut)">${l.q} × ${money(L(l.k).p)}</p><label for="nt">Nota (ej. sin cebolla)</label><input id="nt" maxlength="60" value="${l.n}">${l.q>1?`<label>La nota aplica a</label><div class="pay"><button id="sa" class="on" onclick="setScope('all')">A las ${l.q}</button><button id="s1" onclick="setScope('one')">Solo a 1</button></div>`:''}<label>Comensal</label><div class="dbar">${[...Array(o.nd)].map((_,i)=>`<button class="dch lsd${i+1===l.d?' on':''}" data-d="${i+1}" style="--c:${dcol(i+1)}" onclick="setLsd(${i+1})">${i+1}</button>`).join('')}</div><button class="btn" onclick="saveLine()">Guardar</button><button class="btn alt" onclick="closeSheet()">Cancelar</button>`)}
+function setScope(v){lsc=v;$('sa').className=v==='all'?'on':'';$('s1').className=v==='one'?'on':''}
+function setLsd(d){lsd=d;document.querySelectorAll('.lsd').forEach(b=>b.classList.toggle('on',+b.dataset.d===d))}
+function saveLine(){const o=cur();if(!o){closeSheet();return}const l=o.lines.find(x=>x.id===lsid);if(!l){closeSheet();return}const note=clean($('nt').value);
+if(l.q>1&&lsc==='one'){l.q--;const nl={id:++S.lid,k:l.k,q:1,d:lsd,n:note};o.lines.push(nl);merge(o,nl)}else{l.n=note;l.d=lsd;merge(o,l)}
+save();closeSheet();render()}
+function byDiner(ls){const ds=[...new Set(ls.map(l=>l.d))].sort((a,b)=>a-b),multi=ds.length>1;
+return ds.map(d=>{const g=ls.filter(l=>l.d===d),sub=g.reduce((s,l)=>s+l.p*l.q,0);
+return `<div class="dg">${multi?`<div class="dh" style="--c:${dcol(d)}"><span class="dot">${d}</span>Comensal ${d}<span class="ds">${money(sub)}</span></div>`:''}${g.map(l=>`<div class="row sm"><span class="n">${l.q} × ${l.n}${l.t?`<br><small class="nt">📝 ${l.t}</small>`:''}</span><span class="p">${money(l.p*l.q)}</span></div>`).join('')}</div>`}).join('')}
+function dbar(o){return `<div class="dbar"><span class="dl">Comensal</span>${[...Array(o.nd)].map((_,i)=>`<button class="dch${i+1===o.dc?' on':''}" style="--c:${dcol(i+1)}" onclick="setDiner(${i+1})">${i+1}</button>`).join('')}<button class="dadd" onclick="addDiner()" aria-label="Agregar comensal">+</button>${o.nd>1&&!o.lines.some(l=>l.d===o.nd)?'<button class="dadd" onclick="delDiner()" aria-label="Quitar comensal">−</button>':''}</div><div style="font-size:12px;color:var(--mut);margin-bottom:2px">Lo que toques se agrega al comensal <b style="color:${dcol(o.dc)}">${o.dc}</b></div>`}
+function rowHTML(l){return `<div class="row" style="--c:${dcol(l.d)}"><span class="n" style="cursor:pointer" onclick="lineSheet(${l.id})">${L(l.k).n}<br>${l.n?`<small class="nt">📝 ${l.n}</small>`:'<small class="addn">+ nota</small>'}</span><span class="q"><button onclick="lineQ(${l.id},-1)" aria-label="Quitar uno">−</button><b>${l.q}</b>${l.k.startsWith('x|Descuento')?'':`<button onclick="lineQ(${l.id},1)" aria-label="Agregar uno">+</button>`}</span><span class="p">${money(L(l.k).p*l.q)}</span></div>`}
+function groupsHTML(o){const ds=[...Array(o.nd)].map((_,i)=>i+1).filter(d=>o.lines.some(l=>l.d===d));return ds.map(d=>{const g=o.lines.filter(l=>l.d===d),sub=g.reduce((s,l)=>s+L(l.k).p*l.q,0);return `<div class="dg">${o.nd>1?`<div class="dh" style="--c:${dcol(d)}"><span class="dot">${d}</span>Comensal ${d}<span class="ds">${money(sub)}</span></div>`:''}${g.map(rowHTML).join('')}</div>`}).join('')}
+function rename(){const o=cur();$('modal').innerHTML=`<div class="modal" onclick="if(event.target===this)closeSheet()"><div class="sheet"><h2 class="hand" style="margin:0 0 10px;font-size:30px">Nombre de la orden</h2><input id="nm" value="${o.name.replace(/"/g,'&quot;')}"><button class="btn" onclick="doRename()">Guardar nombre</button><button class="btn alt" onclick="closeSheet()">Cancelar</button></div></div>`}
+function doRename(){const n=$('nm').value.trim();if(n){cur().name=n;save();closeSheet();render()}}
+let yes=null;
+function ask(msg,label,fn){yes=fn;$('modal').innerHTML=`<div class="modal" onclick="if(event.target===this)closeSheet()"><div class="sheet"><p style="font-size:18px;margin-top:0">${msg}</p><button class="btn" onclick="yes();closeSheet()">${label}</button><button class="btn alt" onclick="closeSheet()">No, volver</button></div></div>`}
+function discard(){const o=cur();const go=()=>{S.orders=S.orders.filter(x=>x!==o);S.active=S.orders.length?S.orders[S.orders.length-1].id:null;save();render()};if(count(o))ask('¿Cancelar '+o.name+' sin cobrar?','Sí, cancelar orden',go);else go()}
+function closeSheet(){$('modal').innerHTML=''}
+const shell=h=>`<div class="modal" onclick="if(event.target===this)closeSheet()"><div class="sheet">${h}</div></div>`;
+const VAR={taco:['Papa','Requesón','Frijol'],blandito:['Carnita','Buche','Lengua']};
+function tacoSheet(b){if(!cur())newOrder();const o=cur();
+$('modal').innerHTML=shell(`<h2 class="hand" style="margin:0 0 10px;font-size:30px">${P[b].n} · ${money(P[b].p)} c/u</h2><div class="menu" style="padding:0">${VAR[b].map(v=>{const q=qk(o,b+':'+v);return `<button class="item" onclick="add('${b}:${v}',1);tacoSheet('${b}')">${q?`<i>${q}</i>`:''}<b>${v}</b></button>`}).join('')}</div><button class="btn" onclick="closeSheet()">Listo</button>`)}
+let pick=[],last='';
+const ALL=['Papa','Frijol','Requesón','Buche','Carnita','Lengua'];
+function comboSheet(r){if(!cur())newOrder();if(r){pick=[];last=''}
+$('modal').innerHTML=shell(`<h2 class="hand" style="margin:0 0 4px;font-size:30px">Taco / carne · ${money(P.tacocarne.p)}</h2><p style="margin:0 0 10px;color:var(--mut)">Elige 2 ingredientes${pick.length?': <b style="color:var(--text)">'+pick.join(' + ')+' + …</b>':''}${last&&!pick.length?'<br><b style="color:var(--ok)">✓ Agregado: '+last+'</b>':''}</p><div class="menu" style="padding:0">${ALL.map(v=>`<button class="item${['Buche','Carnita','Lengua'].includes(v)?' meat':''}" onclick="pickC('${v}')"><b>${v}</b></button>`).join('')}</div>${pick.length?'<button class="btn alt" onclick="pick.pop();comboSheet()">Quitar el último</button>':''}<button class="btn" onclick="closeSheet()">Listo</button>`)}
+function pickC(v){pick.push(v);if(pick.length<2){comboSheet();return}const s=[...pick].sort((a,b)=>ALL.indexOf(a)-ALL.indexOf(b)).join('+');pick=[];last=s.replace('+',' y ');add('tacocarne:'+s,1);comboSheet()}
+let mpick=[],mlast='';
+const MIX=['Buche','Carnitas','Surtida','Lengua'];
+function mixSheet(r){if(!cur())newOrder();if(r){mpick=[];mlast=''}
+$('modal').innerHTML=shell(`<h2 class="hand" style="margin:0 0 4px;font-size:30px">Mix · ${money(P.mix.p)}</h2><p style="margin:0 0 10px;color:var(--mut)">Elige 1 o 2 opciones${mpick.length?': <b style="color:var(--text)">'+mpick.join(' + ')+'</b>':''}${mlast&&!mpick.length?'<br><b style="color:var(--ok)">✓ Agregado: '+mlast+'</b>':''}</p><div class="menu" style="padding:0">${MIX.map(v=>`<button class="item${mpick.includes(v)?' sel':''}${v!=='Surtida'?' meat':''}" onclick="mixPick('${v}')"><b>${v}</b></button>`).join('')}</div><button class="btn" ${mpick.length?'':'disabled'} onclick="mixAdd()">Agregar a la orden</button><button class="btn alt" onclick="closeSheet()">Listo</button>`)}
+function mixPick(v){const i=mpick.indexOf(v);if(i>=0)mpick.splice(i,1);else{if(mpick.length>=2)mpick.shift();mpick.push(v)}mixSheet()}
+function mixAdd(){if(!mpick.length)return;const s=[...mpick].sort((a,b)=>MIX.indexOf(a)-MIX.indexOf(b)).join('+');mlast=s.replace('+',' y ');mpick=[];add('mix:'+s,1);mixSheet()}
+function discSheet(){$('modal').innerHTML=shell(`<h2 class="hand" style="margin:0;font-size:30px">Descuento</h2><p style="margin:2px 0 6px;color:var(--mut)">Escribe el monto en pesos a descontar de la orden.</p><label for="dm">Monto ($)</label><input id="dm" type="number" inputmode="decimal" placeholder="0"><button class="btn" onclick="addDisc()">Aplicar descuento</button><button class="btn alt" onclick="closeSheet()">Cancelar</button>`)}
+function addDisc(){const v=+$('dm').value;const o=cur();if(!(v>0)||(o&&v>total(o))){$('dm').style.borderColor='var(--red)';return}if(!o)newOrder();add('x|Descuento|'+(-v),1);closeSheet()}
+function extraSheet(){$('modal').innerHTML=shell(`<h2 class="hand" style="margin:0;font-size:30px">Extra</h2><label for="xn">Nombre</label><input id="xn" placeholder="Ej. Queso extra"><label for="xp">Precio</label><input id="xp" type="number" inputmode="decimal" placeholder="0"><button class="btn" onclick="addExtra()">Agregar a la orden</button><button class="btn alt" onclick="closeSheet()">Cancelar</button>`)}
+function addExtra(){const n=clean($('xn').value),p=+$('xp').value;if(!n||!(p>0)){$('xn').style.borderColor='var(--red)';$('xp').style.borderColor='var(--red)';return}if(!cur())newOrder();add('x|'+n+'|'+p,1);closeSheet()}
+function provSheet(){$('modal').innerHTML=shell(`<h2 class="hand" style="margin:0;font-size:30px">Pago a proveedor</h2><label for="pn">Proveedor</label><input id="pn" placeholder="Ej. Bolillos, carnicería"><label for="pa">Monto pagado</label><input id="pa" type="number" inputmode="decimal" placeholder="0"><button class="btn" onclick="addProv()">Guardar pago</button><button class="btn alt" onclick="closeSheet()">Cancelar</button>`)}
+function addProv(){const n=clean($('pn').value),a=+$('pa').value;if(!n||!(a>0)){$('pn').style.borderColor='var(--red)';$('pa').style.borderColor='var(--red)';return}S.prov=S.prov||[];const pr={id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),name:n,amt:a,ts:Date.now()};S.prov.push(pr);outbox().push({type:'prov',id:pr.id,data:pr});save();closeSheet();render();flush()}
+function delProv(i){ask('¿Borrar este pago a proveedor?','Sí, borrar',()=>{S.prov.splice(i,1);save();render()})}
+let pay='efectivo';
+function setPay(m){pay=m;$('pe').className=m==='efectivo'?'on':'';$('pt').className=m==='tarjeta'?'on':'';$('cash').style.display=m==='efectivo'?'':'none'}
+function openClose(){const o=cur(),t=total(o);pay='efectivo';
+$('modal').innerHTML=`<div class="modal" onclick="if(event.target===this)closeSheet()"><div class="sheet">
+<h2 class="hand" style="margin:0;font-size:30px">${o.name}</h2>
+${byDiner(o.lines.map(snap))}
+<div class="big">${money(t)}</div>
+<div class="pay"><button id="pe" class="on" onclick="setPay('efectivo')">✓ Efectivo</button><button id="pt" onclick="setPay('tarjeta')">✓ Tarjeta</button></div>
+<div id="cash"><label for="paid">Efectivo recibido (opcional)</label>
+<input id="paid" type="number" inputmode="numeric" oninput="chg(${t})">
+<div class="chg" id="chg"></div></div>
+<button class="btn" onclick="finish()">Cobrar y cerrar orden</button>
+<button class="btn alt" onclick="closeSheet()">Volver a la orden</button></div></div>`}
+function chg(t){const v=+$('paid').value;$('chg').innerHTML=v>=t&&v>0?'Cambio: <b>'+money(v-t)+'</b>':(v>0?'Faltan '+money(t-v):'')}
+function finish(){const o=cur();const sale={ordenId:String(o.id),id:'v'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),name:o.name,total:total(o),n:count(o),pay,ts:Date.now(),nd:o.nd,lines:o.lines.map(snap)};S.sold.push(sale);outbox().push({type:'sale',id:sale.id,data:sale});
+S.orders=S.orders.filter(x=>x!==o);S.active=S.orders.length?S.orders[S.orders.length-1].id:null;save();closeSheet();render();flush()}
+function dayRows(){const rows=[['Fecha','Hora','Orden','Comensal','Producto','Cantidad','Precio unitario','Importe','Nota','Pago']];
+S.sold.forEach(s=>{const f=new Date(s.ts),fd=f.toLocaleDateString('es-MX'),ft=f.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+if(s.lines&&s.lines.length){s.lines.forEach(l=>rows.push([fd,ft,s.name,l.d,l.n,l.q,l.p,l.p*l.q,l.t||'',s.pay||'']))}
+else rows.push([fd,ft,s.name,'','Venta (sin detalle)','','',s.total,'',s.pay||''])});
+return rows}
+function closeDay(){const rows=dayRows();const cash=S.sold.filter(s=>s.pay==='efectivo').reduce((a,s)=>a+s.total,0),card=S.sold.filter(s=>s.pay==='tarjeta').reduce((a,s)=>a+s.total,0),tot=S.sold.reduce((a,s)=>a+s.total,0),ps=(S.prov||[]).reduce((a,p)=>a+p.amt,0);
+rows.push([]);rows.push(['Resumen del día','','','','','','','','','']);rows.push(['Venta total','','','','','','',tot,'','']);rows.push(['Efectivo','','','','','','',cash,'','']);rows.push(['Tarjeta','','','','','','',card,'','']);rows.push(['Pagos a proveedores','','','','','','',ps,'','']);rows.push(['Subtotal','','','','','','',tot-ps,'','']);
+if((S.prov||[]).length){rows.push([]);rows.push(['Proveedor','Hora','','','','','','Monto','','']);S.prov.forEach(p=>rows.push([p.name,new Date(p.ts).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),'','','','','',p.amt,'','']))}
+if(FS){const dk=new Date().toLocaleDateString('sv-SE');FS.collection('cierres').doc(dk).set({dia:dk,ventaTotal:tot,efectivo:cash,tarjeta:card,pagosProveedores:ps,subtotal:tot-ps,ordenes:S.sold.length,cerradoEn:new Date()},{merge:true}).catch(()=>{})}
+const csv=rows.map(r=>r.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\n');
+$('modal').innerHTML=shell(`<h2 class="hand" style="margin:0 0 6px;font-size:30px">Cierre del día</h2><div style="font-size:14px;color:var(--mut);margin-bottom:8px">Venta total <b style="color:var(--text)">${money(tot)}</b> · Pagos a proveedores <b style="color:var(--text)">${money(ps)}</b> · Subtotal <b style="color:var(--ok)">${money(tot-ps)}</b> · ${S.sold.length} órdenes</div><label for="csvbox">Copia este texto y pégalo en Sheets o Excel (se separa en columnas)</label><textarea id="csvbox" readonly style="width:100%;height:160px;font-size:12px;background:var(--card);color:var(--text);border:1.5px solid var(--line);border-radius:10px;padding:8px">${csv.replace(/</g,'&lt;')}</textarea><button class="btn" onclick="copyDay()">Copiar datos</button><button class="btn alt" onclick="resetDay()">Reiniciar conteo para mañana</button><button class="btn alt" onclick="closeSheet()">Cerrar sin reiniciar</button>`);
+window._csv=csv}
+function copyDay(){const t=$('csvbox');t.select();t.setSelectionRange(0,99999);let ok=false;try{ok=document.execCommand('copy')}catch(e){}if(!ok&&navigator.clipboard){navigator.clipboard.writeText(window._csv).catch(()=>{})}const b=document.querySelector('#modal .btn');if(b)b.textContent=ok||navigator.clipboard?'✓ Copiado':'Selecciona el texto y copia'}
+function resetDay(){ask('¿Reiniciar el conteo? Se borran las ventas y pagos de hoy de la app. Asegúrate de haber copiado los datos.','Sí, reiniciar',()=>{S.sold=[];S.prov=[];save();render()})}
+function render(){migrate();
+$('tabs').innerHTML=S.orders.map(o=>`<button class="tab ${o.id===S.active?'on':''}" onclick="S.active=${o.id};save();render()">${o.name}<small>${money(total(o))}</small></button>`).join('')+'<button class="tab new" onclick="newOrder()">+ Nueva orden</button>';
+const o=cur();
+$('menu').innerHTML=MENU.map(m=>{const q=o?o.lines.filter(l=>l.k.split(':')[0]===m.id).reduce((a,l)=>a+l.q,0):0;const act=m.id==='tacocarne'?'comboSheet(true)':m.id==='mix'?'mixSheet(true)':VAR[m.id]?`tacoSheet('${m.id}')`:(o?`add('${m.id}',1)`:'newOrder()');return `<button class="item" onclick="${act}">${q?`<i>${q}</i>`:''}<b>${m.n}</b><span>${money(m.p)}</span></button>`}).join('')+'<button class="item dash" onclick="discSheet()"><b>− Descuento</b><span style="color:var(--mut);font-size:14px">Monto en pesos</span></button><button class="item dash" onclick="extraSheet()"><b>+ Extras</b><span style="color:var(--mut);font-size:14px">Nombre y precio</span></button>';
+if(!o){$('ticket').innerHTML='<div class="empty">No hay órdenes abiertas. Toca “+ Nueva orden” o cualquier producto para empezar.</div>'}
+else{const ks=o.lines;
+$('ticket').innerHTML=`<header><h2 class="hand">${o.name}</h2><span><button class="link" onclick="rename()">Renombrar</button> <button class="link" onclick="discard()">Cancelar</button></span></header>
+${dbar(o)}${ks.length?groupsHTML(o):'<div class="empty">Toca un producto para agregarlo.</div>'}
+<div class="total"><span>Total</span><strong>${money(total(o))}</strong></div>
+<button class="btn" ${ks.length?'':'disabled'} onclick="openClose()">Cerrar orden</button>`}
+const td=S.sold,sum=td.reduce((a,s)=>a+s.total,0),by=m=>td.filter(s=>s.pay===m).reduce((a,s)=>a+s.total,0),cash=by('efectivo'),card=by('tarjeta');
+$('hist').innerHTML=`<summary>Ventas · ${td.length} órdenes</summary><div class="split"><span>💵 Efectivo <b>${money(cash)}</b></span><span>💳 Tarjeta <b>${money(card)}</b></span></div>`+td.slice().reverse().map(s=>`<details class="sale"><summary><span class="n">${s.name} · ${new Date(s.ts).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}<br><small style="color:var(--mut)">${s.pay==='tarjeta'?'💳 Tarjeta':s.pay==='efectivo'?'💵 Efectivo':'Sin registrar'}${s.lines?' · toca para ver quién pidió qué':''}</small></span><span class="p">${money(s.total)}</span></summary>${s.lines?byDiner(s.lines):''}</details>`).join('')+(td.length?'<button class="btn alt" onclick="ask(\'¿Reiniciar las ventas a $0? Se borrará todo el historial.\',\'Sí, reiniciar ventas\',()=>{S.sold=[];save();render()})">Reiniciar ventas</button>':'');
+S.prov=S.prov||[];const pv=S.prov,ps=pv.reduce((a,p)=>a+p.amt,0);
+$('prov').innerHTML=`<summary>Pagos a proveedores · ${pv.length}</summary><button class="btn" onclick="provSheet()">+ Registrar pago a proveedor</button>`+pv.map((p,i)=>[p,i]).reverse().map(([p,i])=>`<div class="row"><span class="n">${p.name}<br><small style="color:var(--mut)">${new Date(p.ts).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</small></span><span class="p">${money(p.amt)}</span><button class="link" onclick="delProv(${i})" aria-label="Borrar pago">✕</button></div>`).join('')+(pv.length?'<button class="btn alt" onclick="ask(\'¿Reiniciar los pagos a proveedores a $0?\',\'Sí, reiniciar pagos\',()=>{S.prov=[];save();render()})">Reiniciar pagos</button>':'');
+$('sum').innerHTML=`<div class="srow"><span>Venta total</span><b>${money(sum)}</b></div><div class="split" style="padding:0 0 4px"><span>💵 ${money(cash)}</span><span>💳 ${money(card)}</span></div><div class="srow"><span>Pagos a proveedores</span><b>− ${money(ps)}</b></div><div class="srow big2"><span>Subtotal</span><b style="color:${sum-ps<0?'var(--red)':'var(--ok)'}">${money(sum-ps)}</b></div><button class="btn alt" onclick="closeDay()">Cerrar día: exportar y reiniciar</button>`;
+}
+if(S.orders.length&&!cur())S.active=S.orders[0].id;
+render();
+if(!S.orders.length)newOrder();syncStatus();flush();try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));
+</script>
+</body>
+</html>

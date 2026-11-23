@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cocina · CuentaSmart</title>
+<style>
+:root{--bg:#101418;--card:#1b222a;--text:#f2f4f6;--mut:#9aa6b2;--ok:#2fbf71;--red:#e5483c;--teal:#149C98;--line:#2c3742}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:17px/1.35 system-ui,-apple-system,sans-serif;padding:env(safe-area-inset-top,0px) 14px env(safe-area-inset-bottom,0px)}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 4px 8px}
+h1{font-size:22px}
+#estado{font-size:13px;color:var(--mut)}
+.warn{background:#3a2a10;color:#ffd27a;border-radius:10px;padding:8px 12px;margin:6px 0;font-size:14px;display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:8px}
+.ord{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.ord h2{font-size:20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ord h2 small{font-size:12px;color:var(--mut);font-weight:400}
+.dg{margin-top:8px;border-left:4px solid var(--c);padding-left:10px}
+.dg h3{font-size:13px;color:var(--c);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.it{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.it .t{flex:1}
+.it .t b{font-size:18px}
+.it .t .nota{display:block;color:#ffd27a;font-size:15px;font-style:italic;margin-top:2px}
+.it .q{font-size:20px;font-weight:800;min-width:34px;text-align:center}
+.it button{min-width:112px;padding:12px 10px;border:0;border-radius:10px;background:var(--ok);color:#fff;font:700 16px system-ui;cursor:pointer}
+.it.listo{opacity:.45}.it.listo .t b{text-decoration:line-through}
+.it.listo button{background:#3b4652}
+.vacio{color:var(--mut);text-align:center;margin-top:60px;font-size:18px}
+</style></head><body>
+<header><h1>Cocina</h1><div id="estado">Conectando…</div></header>
+<div class="warn" id="warn">Sin conexión: esto puede estar desactualizado. Las órdenes llegarán al reconectar.</div>
+<div id="lista"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const COL=['#149C98','#C2447F','#E39A2D','#7A5CC9','#2B7FD8','#D9543A','#6B8E23','#6B7F86'];
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+const FB={apiKey:"AIzaSyAXnKsDMUgAdNVCXwQVQUrPVID4Gwnv_lo",authDomain:"cuentasmart-d1c7f.firebaseapp.com",projectId:"cuentasmart-d1c7f",storageBucket:"cuentasmart-d1c7f.firebasestorage.app",messagingSenderId:"1066968485319",appId:"1:1066968485319:web:0dbfb4f45ceda3e9a29de2"};
+firebase.initializeApp(FB);
+const db=firebase.firestore();
+db.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+let docs=[];
+function pintar(){
+  const grupos={};
+  docs.forEach(d=>{const x=d.data();const oid=x.ordenId||'?';
+    (grupos[oid]=grupos[oid]||{nombre:x.ordenNombre||'Orden',items:[]}).items.push({ref:d.ref,...x})});
+  const ids=Object.keys(grupos);
+  if(!ids.length){$('lista').innerHTML='<div class="vacio">Sin órdenes pendientes</div>';return}
+  $('lista').innerHTML='<div class="grid">'+ids.map(oid=>{const g=grupos[oid];
+    const porD={};g.items.forEach(i=>{(porD[i.comensal]=porD[i.comensal]||[]).push(i)});
+    const dsKeys=Object.keys(porD).sort((a,b)=>a-b);
+    const pend=g.items.filter(i=>i.estadoCocina!=='listo').length;
+    return `<div class="ord"><h2>${esc(g.nombre)} <small>${pend?pend+' pendiente(s)':'todo listo'}</small></h2>`+
+      dsKeys.map(dk=>{const c=COL[(dk-1)%COL.length];
+        return `<div class="dg" style="--c:${c}"><h3>Comensal ${esc(dk)}</h3>`+
+        porD[dk].map(i=>{const listo=i.estadoCocina==='listo';
+          return `<div class="it${listo?' listo':''}"><div class="t"><b>${i.cantidad} × ${esc(i.producto)}</b>${i.nota?`<span class="nota">📝 ${esc(i.nota)}</span>`:''}</div>`+
+          `<button onclick="marcar('${i.ref.path}',${listo})">${listo?'Deshacer':'Listo'}</button></div>`}).join('')+'</div>'}).join('')+'</div>'}).join('')+'</div>'}
+async function marcar(path,estabaListo){
+  const ref=db.doc(path);
+  await ref.update(estabaListo?{estadoCocina:'pendiente',listoEn:null}:{estadoCocina:'listo',listoEn:firebase.firestore.FieldValue.serverTimestamp()});
+}
+firebase.auth().signInAnonymously().catch(()=>{$('estado').textContent='⚠ Sin sesión'});
+db.collectionGroup('lineas').where('abierta','==',true).onSnapshot(snap=>{
+  docs=snap.docs;pintar();
+  $('warn').style.display=snap.metadata.fromCache?'block':'none';
+  $('estado').textContent=snap.metadata.fromCache?'Sin conexión':'En vivo · '+new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+},err=>{$('estado').textContent='⚠ '+(err.code||'error');$('lista').innerHTML='<div class="vacio">No puedo leer las órdenes. Revisa reglas e índices en la consola.</div>'});
+</script></body></html>
